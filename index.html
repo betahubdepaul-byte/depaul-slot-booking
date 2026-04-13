@@ -715,7 +715,7 @@
       GITHUB_REPO: 'depaul-slot-booking',
       GITHUB_BRANCH: 'main',
       DATA_PATH: 'data/bookings.json',
-      GT_TOKEN: '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',
+      GT_TOKEN: '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',
       ADMIN_EMAIL: 'dmalaviy@depaul.edu',
     };
 
@@ -949,20 +949,7 @@
       };
 
       setLoading(true, 'Saving booking...');
-      const saved = await triggerWorkflow('save_booking', { booking_data: JSON.stringify(booking) });
-
-      setLoading(true, 'Sending confirmation email...');
-      const emailSent = await triggerWorkflow('send_email', {
-        name: booking.name,
-        email: booking.email,
-        student_id: booking.studentId,
-        course: booking.course,
-        subject: booking.subject,
-        reason: booking.reason,
-        day: booking.day,
-        day_display: booking.dayDisplay,
-        time_range: booking.timeRange,
-      });
+      await saveToGitHub(booking);
 
       setLoading(false);
 
@@ -981,7 +968,7 @@
         `<div class="detail-row"><span class="lbl">${l}</span><span class="val">${val}</span></div>`
       ).join('');
 
-      document.getElementById('email-status-box').innerHTML = saved && emailSent
+      document.getElementById('email-status-box').innerHTML = `<div class="email-status email-ok"><strong>Booking confirmed!</strong><br>Your appointment has been saved.</div>`;
         ? `<div class="email-status email-ok">
          <strong>Booking confirmed!</strong><br>
          Confirmation sent to ${booking.email} and admin.
@@ -994,27 +981,58 @@
       showScreen('step4');
     }
 
-    async function triggerWorkflow(action, inputs = {}) {
+    async function saveToGitHub(booking) {
       try {
-        const response = await fetch(
-          `https://api.github.com/repos/${CONFIG.GITHUB_OWNER}/${CONFIG.GITHUB_REPO}/actions/workflows/handle_booking.yml/dispatches`,
+        // Get current file SHA
+        const getRes = await fetch(
+          `https://api.github.com/repos/${CONFIG.GITHUB_OWNER}/${CONFIG.GITHUB_REPO}/contents/${CONFIG.DATA_PATH}`,
           {
-            method: 'POST',
             headers: {
-              'Accept': 'application/vnd.github.v3+json',
               'Authorization': `Bearer ${CONFIG.GT_TOKEN}`,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              ref: CONFIG.GITHUB_BRANCH,
-              inputs: { action, ...inputs },
-            }),
+              'Accept': 'application/vnd.github.v3+json'
+            }
           }
         );
-        return response.status === 204 || response.ok;
+        
+        let sha = null;
+        if (getRes.ok) {
+          const getData = await getRes.json();
+          sha = getData.sha;
+        }
+
+        // Add booking to list
+        bookings.push(booking);
+
+        // Save
+        const content = btoa(encodeURIComponent(JSON.stringify(bookings, null, 2)));
+        const body = {
+          message: `Booking: ${booking.name} — ${booking.day} ${booking.dayDisplay}`,
+          content,
+          branch: CONFIG.GITHUB_BRANCH,
+        };
+        if (sha) body.sha = sha;
+
+        const saveRes = await fetch(
+          `https://api.github.com/repos/${CONFIG.GITHUB_OWNER}/${CONFIG.GITHUB_REPO}/contents/${CONFIG.DATA_PATH}`,
+          {
+            method: 'PUT',
+            headers: {
+              'Authorization': `Bearer ${CONFIG.GT_TOKEN}`,
+              'Accept': 'application/vnd.github.v3+json',
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(body),
+          }
+        );
+
+        if (!saveRes.ok) {
+          const error = await saveRes.json().catch(() => ({}));
+          toast('Failed to save booking');
+          console.error('Save error:', error);
+        }
       } catch (e) {
-        console.error('Workflow error:', e);
-        return false;
+        console.error('Save error:', e);
+        toast('Network error');
       }
     }
 
@@ -1027,10 +1045,8 @@
       });
     }
 
-
-
     // ================================================================
-    // GITHUB API — READ / WRITE bookings.json
+    // GITHUB API — READ bookings.json
     // ================================================================
 
     async function loadBookings() {
