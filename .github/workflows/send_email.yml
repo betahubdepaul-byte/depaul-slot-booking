@@ -1,0 +1,127 @@
+name: Send Booking Confirmation Email
+
+on:
+  workflow_dispatch:
+    inputs:
+      booking_id:
+        description: 'Booking ID'
+        required: true
+      name:
+        description: 'Student Name'
+        required: true
+      email:
+        description: 'Student Email'
+        required: true
+      student_id:
+        description: 'Student ID'
+        required: true
+      course:
+        description: 'Course'
+        required: true
+      subject:
+        description: 'Subject'
+        required: true
+      reason:
+        description: 'Reason'
+        required: true
+      day:
+        description: 'Day'
+        required: true
+      day_display:
+        description: 'Day Display'
+        required: true
+      time_range:
+        description: 'Time Range'
+        required: true
+
+jobs:
+  send-email:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Send confirmation email
+        env:
+          GMAIL_EMAIL: ${{ secrets.GMAIL_EMAIL }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
+          SENDER_NAME: "Beta Hub"
+        run: |
+          python3 << 'PYEOF'
+import smtplib
+import os
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+import sys
+
+# Get inputs from environment
+name = """${{ github.event.inputs.name }}""".strip()
+email = """${{ github.event.inputs.email }}""".strip()
+student_id = """${{ github.event.inputs.student_id }}""".strip()
+course = """${{ github.event.inputs.course }}""".strip()
+subject = """${{ github.event.inputs.subject }}""".strip()
+reason = """${{ github.event.inputs.reason }}""".strip()
+day = """${{ github.event.inputs.day }}""".strip()
+day_display = """${{ github.event.inputs.day_display }}""".strip()
+time_range = """${{ github.event.inputs.time_range }}""".strip()
+
+gmail_email = os.environ.get('GMAIL_EMAIL')
+gmail_password = os.environ.get('GMAIL_APP_PASSWORD')
+admin_email = os.environ.get('ADMIN_EMAIL')
+sender_name = os.environ.get('SENDER_NAME', 'Beta Hub')
+
+if not gmail_email or not gmail_password:
+    print("ERROR: GMAIL_EMAIL or GMAIL_APP_PASSWORD not configured in secrets")
+    sys.exit(1)
+
+# Create email body
+body = f"""
+<html>
+<body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+  <div style="background: #1E4D8C; color: white; padding: 20px; border-radius: 12px 12px 0 0; text-align: center;">
+    <h2 style="margin: 0;">DePaul Slot Booking — Confirmed</h2>
+  </div>
+  <div style="background: white; padding: 24px; border: 1px solid #e0e0e0; border-top: none; border-radius: 0 0 12px 12px;">
+    <p>Hi <strong>{name}</strong>,</p>
+    <p>Your appointment has been confirmed with the following details:</p>
+    <table style="width: 100%; border-collapse: collapse; margin: 16px 0;">
+      <tr><td style="padding: 8px; border-bottom: 1px solid #eee; font-weight: 600; color: #666;">Date</td>
+          <td style="padding: 8px; border-bottom: 1px solid #eee;">{day}, {day_display}</td></tr>
+      <tr><td style="padding: 8px; border-bottom: 1px solid #eee; font-weight: 600; color: #666;">Time</td>
+          <td style="padding: 8px; border-bottom: 1px solid #eee;">{time_range}</td></tr>
+      <tr><td style="padding: 8px; border-bottom: 1px solid #eee; font-weight: 600; color: #666;">Student</td>
+          <td style="padding: 8px; border-bottom: 1px solid #eee;">{name} ({student_id})</td></tr>
+      <tr><td style="padding: 8px; border-bottom: 1px solid #eee; font-weight: 600; color: #666;">Email</td>
+          <td style="padding: 8px; border-bottom: 1px solid #eee;">{email}</td></tr>
+      <tr><td style="padding: 8px; border-bottom: 1px solid #eee; font-weight: 600; color: #666;">Course</td>
+          <td style="padding: 8px; border-bottom: 1px solid #eee;">{course}</td></tr>
+      <tr><td style="padding: 8px; border-bottom: 1px solid #eee; font-weight: 600; color: #666;">Subject</td>
+          <td style="padding: 8px; border-bottom: 1px solid #eee;">{subject}</td></tr>
+      <tr><td style="padding: 8px; font-weight: 600; color: #666;">Reason</td>
+          <td style="padding: 8px;">{reason}</td></tr>
+    </table>
+    <p style="color: #666; font-size: 13px;">This is an automated confirmation. Please arrive on time.</p>
+  </div>
+</body>
+</html>
+"""
+
+subject_line = f"Slot Confirmed — {day}, {day_display} at {time_range}"
+
+msg = MIMEMultipart('alternative')
+msg['From'] = f"{sender_name} <{gmail_email}>"
+msg['To'] = email
+msg['Cc'] = admin_email
+msg['Subject'] = subject_line
+msg.attach(MIMEText(body, 'html'))
+
+try:
+    server = smtplib.SMTP('smtp.gmail.com', 587)
+    server.starttls()
+    server.login(gmail_email, gmail_password)
+    server.sendmail(gmail_email, [email, admin_email], msg.as_string())
+    server.quit()
+    print(f"Email sent successfully to {email} and {admin_email}")
+except Exception as e:
+    print(f"Failed to send email: {e}")
+    sys.exit(1)
+PYEOF
