@@ -1,45 +1,132 @@
-name: Send Booking Confirmation Email
+name: Handle Booking
 
 on:
   workflow_dispatch:
     inputs:
-      booking_id:
-        description: 'Booking ID'
+      action:
+        description: 'Action (save_booking or send_email)'
         required: true
+        default: 'save_booking'
+      # Booking data
+      booking_data:
+        description: 'JSON booking data (for save_booking)'
+        required: false
+      # Email data
+      booking_id:
+        description: 'Booking ID (for send_email)'
+        required: false
       name:
         description: 'Student Name'
-        required: true
+        required: false
       email:
         description: 'Student Email'
-        required: true
+        required: false
       student_id:
         description: 'Student ID'
-        required: true
+        required: false
       course:
         description: 'Course'
-        required: true
+        required: false
       subject:
         description: 'Subject'
-        required: true
+        required: false
       reason:
         description: 'Reason'
-        required: true
+        required: false
       day:
         description: 'Day'
-        required: true
+        required: false
       day_display:
         description: 'Day Display'
-        required: true
+        required: false
       time_range:
         description: 'Time Range'
-        required: true
+        required: false
 
 jobs:
-  send-email:
+  handle-booking:
     runs-on: ubuntu-latest
     
     steps:
-      - name: Send confirmation email
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Save Booking
+        if: github.event.inputs.action == 'save_booking'
+        env:
+          BOOKING_DATA: ${{ github.event.inputs.booking_data }}
+          GH_TOKEN: ${{ secrets.GT_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          python3 << 'PYEOF'
+import base64
+import json
+import os
+import urllib.request
+
+booking_data = os.environ.get('BOOKING_DATA', '[]')
+gh_token = os.environ.get('GH_TOKEN')
+repo = os.environ.get('REPO')
+
+# Parse booking
+try:
+    new_booking = json.loads(booking_data)
+except:
+    print("Invalid booking data")
+    exit(1)
+
+# Get current bookings
+req = urllib.request.Request(
+    f"https://api.github.com/repos/{repo}/contents/data/bookings.json",
+    headers={
+        "Authorization": f"Bearer {gh_token}",
+        "Accept": "application/vnd.github.v3+json"
+    }
+)
+
+try:
+    with urllib.request.urlopen(req) as resp:
+        data = json.load(resp)
+        sha = data["sha"]
+        current = json.loads(base64.b64decode(data["content"]).decode('utf-8'))
+except:
+    current = []
+    sha = None
+
+# Add new booking
+current.append(new_booking)
+
+# Save back to GitHub
+content = base64.b64encode(json.dumps(current, indent=2, ensure_ascii=False).encode('utf-8')).decode()
+
+body = {
+    "message": f"Booking: {new_booking['name']} — {new_booking['day']} {new_booking['dayDisplay']}",
+    "content": content,
+    "branch": "main"
+}
+if sha:
+    body["sha"] = sha
+
+req = urllib.request.Request(
+    f"https://api.github.com/repos/{repo}/contents/data/bookings.json",
+    data=json.dumps(body).encode(),
+    headers={
+        "Authorization": f"Bearer {gh_token}",
+        "Accept": "application/vnd.github.v3+json",
+        "Content-Type": "application/json"
+    },
+    method='PUT'
+)
+
+with urllib.request.urlopen(req) as resp:
+    result = json.load(resp)
+    print(f"Booking saved! Commit: {result['commit']['sha'][:8]}")
+PYEOF
+
+      - name: Send Confirmation Email
+        if: github.event.inputs.action == 'send_email'
         env:
           GMAIL_EMAIL: ${{ secrets.GMAIL_EMAIL }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
@@ -51,9 +138,7 @@ import smtplib
 import os
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-import sys
 
-# Get inputs from environment
 name = """${{ github.event.inputs.name }}""".strip()
 email = """${{ github.event.inputs.email }}""".strip()
 student_id = """${{ github.event.inputs.student_id }}""".strip()
@@ -69,12 +154,7 @@ gmail_password = os.environ.get('GMAIL_APP_PASSWORD')
 admin_email = os.environ.get('ADMIN_EMAIL')
 sender_name = os.environ.get('SENDER_NAME', 'Beta Hub')
 
-if not gmail_email or not gmail_password:
-    print("ERROR: GMAIL_EMAIL or GMAIL_APP_PASSWORD not configured in secrets")
-    sys.exit(1)
-
-# Create email body
-body = f"""
+body_html = f"""
 <html>
 <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
   <div style="background: #1E4D8C; color: white; padding: 20px; border-radius: 12px 12px 0 0; text-align: center;">
@@ -90,8 +170,6 @@ body = f"""
           <td style="padding: 8px; border-bottom: 1px solid #eee;">{time_range}</td></tr>
       <tr><td style="padding: 8px; border-bottom: 1px solid #eee; font-weight: 600; color: #666;">Student</td>
           <td style="padding: 8px; border-bottom: 1px solid #eee;">{name} ({student_id})</td></tr>
-      <tr><td style="padding: 8px; border-bottom: 1px solid #eee; font-weight: 600; color: #666;">Email</td>
-          <td style="padding: 8px; border-bottom: 1px solid #eee;">{email}</td></tr>
       <tr><td style="padding: 8px; border-bottom: 1px solid #eee; font-weight: 600; color: #666;">Course</td>
           <td style="padding: 8px; border-bottom: 1px solid #eee;">{course}</td></tr>
       <tr><td style="padding: 8px; border-bottom: 1px solid #eee; font-weight: 600; color: #666;">Subject</td>
@@ -105,23 +183,17 @@ body = f"""
 </html>
 """
 
-subject_line = f"Slot Confirmed — {day}, {day_display} at {time_range}"
-
 msg = MIMEMultipart('alternative')
 msg['From'] = f"{sender_name} <{gmail_email}>"
 msg['To'] = email
 msg['Cc'] = admin_email
-msg['Subject'] = subject_line
-msg.attach(MIMEText(body, 'html'))
+msg['Subject'] = f"Slot Confirmed — {day}, {day_display} at {time_range}"
+msg.attach(MIMEText(body_html, 'html'))
 
-try:
-    server = smtplib.SMTP('smtp.gmail.com', 587)
-    server.starttls()
-    server.login(gmail_email, gmail_password)
-    server.sendmail(gmail_email, [email, admin_email], msg.as_string())
-    server.quit()
-    print(f"Email sent successfully to {email} and {admin_email}")
-except Exception as e:
-    print(f"Failed to send email: {e}")
-    sys.exit(1)
+server = smtplib.SMTP('smtp.gmail.com', 587)
+server.starttls()
+server.login(gmail_email, gmail_password)
+server.sendmail(gmail_email, [email, admin_email], msg.as_string())
+server.quit()
+print(f"Email sent to {email} and {admin_email}")
 PYEOF
