@@ -11,7 +11,7 @@
     "dayDate": "2026-04-15",
     "dayDisplay": "Apr 15, 2026",
     "slotId": "1330",
-    "timeRange": "13:30 â 14:00",
+    "timeRange": "13:30 Ã¢ÂÂ 14:00",
     "bookedAt": "2026-04-13T19:17:30.792Z"
   },
   {
@@ -26,7 +26,22 @@
     "dayDate": "2026-04-13",
     "dayDisplay": "Apr 13, 2026",
     "slotId": "1000",
-    "timeRange": "10:00 – 10:30",
+    "timeRange": "10:00 â 10:30",
     "bookedAt": "2026-04-13T19:19:52.440Z"
+  },
+  {
+    "id": "1776108236446",
+    "name": "Test User",
+    "email": "test@depaul.edu",
+    "studentId": "1234567",
+    "course": "CSC 555",
+    "subject": "Project Review",
+    "reason": "Testing SMTP failure.",
+    "day": "Monday",
+    "dayDate": "2026-04-13",
+    "dayDisplay": "Apr 13, 2026",
+    "slotId": "1130",
+    "timeRange": "11:30 – 12:00",
+    "bookedAt": "2026-04-13T19:23:56.446Z"
   }
 ]
