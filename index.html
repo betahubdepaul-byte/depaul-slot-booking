@@ -715,7 +715,7 @@
       GITHUB_REPO: 'depaul-slot-booking',
       GITHUB_BRANCH: 'main',
       DATA_PATH: 'data/bookings.json',
-      GT_TOKEN: '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',
+      GH_TOKENN: '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',
       ADMIN_EMAIL: 'dmalaviy@depaul.edu',
     };
 
@@ -988,7 +988,7 @@
           `https://api.github.com/repos/${CONFIG.GITHUB_OWNER}/${CONFIG.GITHUB_REPO}/contents/${CONFIG.DATA_PATH}`,
           {
             headers: {
-              'Authorization': `Bearer ${CONFIG.GT_TOKEN}`,
+              'Authorization': `Bearer ${CONFIG.GH_TOKENN}`,
               'Accept': 'application/vnd.github.v3+json'
             }
           }
@@ -1017,7 +1017,7 @@
           {
             method: 'PUT',
             headers: {
-              'Authorization': `Bearer ${CONFIG.GT_TOKEN}`,
+              'Authorization': `Bearer ${CONFIG.GH_TOKENN}`,
               'Accept': 'application/vnd.github.v3+json',
               'Content-Type': 'application/json',
             },
