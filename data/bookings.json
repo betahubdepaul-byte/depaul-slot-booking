@@ -1,1 +1,17 @@
-[]
+[
+  {
+    "id": "123",
+    "name": "fd",
+    "email": "dedi@depaul.edu",
+    "studentId": "ds",
+    "course": "ds",
+    "subject": "ds",
+    "reason": "ss",
+    "day": "Monday",
+    "dayDate": "2026-04-13",
+    "dayDisplay": "Apr 13, 2026",
+    "slotId": "1000",
+    "timeRange": "10:00 - 10:30",
+    "bookedAt": "2026-04-13T10:00:00Z"
+  }
+]
