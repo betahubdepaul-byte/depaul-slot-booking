@@ -88,5 +88,20 @@
     "slotId": "1130",
     "timeRange": "11:30 – 12:00",
     "bookedAt": "2026-04-14T00:45:57.867Z"
+  },
+  {
+    "id": "1776127754330",
+    "name": "Test run 1",
+    "email": "sraval4@depaul.edu",
+    "studentId": "5543215",
+    "course": "MGT-509",
+    "subject": "Project Management",
+    "reason": "Eye tracking",
+    "day": "Tuesday",
+    "dayDate": "2026-04-14",
+    "dayDisplay": "Apr 14, 2026",
+    "slotId": "1530",
+    "timeRange": "15:30 – 16:00",
+    "bookedAt": "2026-04-14T00:49:14.330Z"
   }
 ]
