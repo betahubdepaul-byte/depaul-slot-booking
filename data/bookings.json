@@ -103,5 +103,20 @@
     "slotId": "1530",
     "timeRange": "15:30 – 16:00",
     "bookedAt": "2026-04-14T00:49:14.330Z"
+  },
+  {
+    "id": "1776175175911",
+    "name": "Harsh",
+    "email": "hpadsala@depaul.edu",
+    "studentId": "6864384",
+    "course": "DSC 543",
+    "subject": "Data",
+    "reason": "Try",
+    "day": "Tuesday",
+    "dayDate": "2026-04-14",
+    "dayDisplay": "Apr 14, 2026",
+    "slotId": "1030",
+    "timeRange": "10:30 – 11:00",
+    "bookedAt": "2026-04-14T13:59:35.911Z"
   }
 ]
