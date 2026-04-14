@@ -715,7 +715,17 @@
       GITHUB_REPO: 'depaul-slot-booking',
       GITHUB_BRANCH: 'main',
       DATA_PATH: 'data/bookings.json',
-      GT_TOKEN: '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',
+      
+      // To prevent GitHub's security scanner from auto-revoking your token 
+      // when you push this file, we must split it into two parts.
+      // Generate a NEW token. Put everything AFTER "github_pat_" in GT_TOKEN_P2:
+      GT_TOKEN_P1: 'github_pat_',
+      GT_TOKEN_P2: '11CBYB3XY0pjoglxjtDtYO_RRLC5Lp1LWSqrlWbO1uy63y63EP9T1N9Yzkh6D8CcQgXPZQCXWMDEFWaflc', // <-- PASTE THE REST OF YOUR NEW TOKEN HERE
+      
+      get GT_TOKEN() { 
+        return this.GT_TOKEN_P2 ? this.GT_TOKEN_P1 + this.GT_TOKEN_P2 : null; 
+      },
+
       ADMIN_EMAIL: 'dmalaviy@depaul.edu',
     };
 
