@@ -1,642 +1,1086 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DePaul Slot Booking</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%231E4D8C'/><text x='16' y='23' text-anchor='middle' fill='white' font-size='20' font-family='Georgia'>D</text></svg>" />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
-    :root{
-      --blue:#1E4D8C;--blue-dark:#0d2847;--blue-light:#e8f0fe;
-      --green:#d7f0d7;--green-accent:#2e7d32;
-      --red:#ffcdd2;--red-dark:#c62828;
-      --mine:#bbdefb;--mine-dark:#1565c0;
-      --bg:#f0f2f5;--card:#fff;--text:#1a1a2e;--muted:#666;--border:#e0e0e0;
+    :root {
+      --blue: #1E4D8C;
+      --blue-dark: #0d2847;
+      --blue-light: #e8f0fe;
+      --green: #d7f0d7;
+      --green-accent: #2e7d32;
+      --red: #ffcdd2;
+      --red-dark: #c62828;
+      --mine: #bbdefb;
+      --mine-dark: #1565c0;
+      --bg: #f0f2f5;
+      --card: #fff;
+      --text: #1a1a2e;
+      --muted: #666;
+      --border: #e0e0e0;
     }
-    *{margin:0;padding:0;box-sizing:border-box}
-    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased}
 
-    /* Screens */
-    .scr{display:none}
-    .scr.on{display:block}
-    .scr-center.on{display:flex;min-height:100vh;align-items:center;justify-content:center;padding:20px}
-    #s1.on{background:linear-gradient(135deg,var(--blue) 0%,var(--blue-dark) 60%,#0a1628 100%)}
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box
+    }
 
-    /* Card */
-    .card{background:var(--card);border-radius:16px;padding:32px 28px;width:100%;max-width:460px;box-shadow:0 8px 32px rgba(0,0,0,.1)}
-    #s1 .card{box-shadow:0 20px 60px rgba(0,0,0,.3)}
-    @media(max-width:480px){.card{padding:24px 18px;border-radius:12px}}
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh
+    }
 
-    .logo-row{display:flex;align-items:center;gap:12px;margin-bottom:6px}
-    .logo-icon{width:44px;height:44px;background:var(--blue);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#fff;font-family:Georgia,serif;flex-shrink:0}
-    .card h1{font-size:19px;color:var(--blue)}
-    .card .sub{font-size:13px;color:var(--muted);margin:4px 0 20px}
+    .screen {
+      display: none
+    }
 
-    /* Progress */
-    .prog{display:flex;gap:6px;margin-bottom:22px}
-    .prog span{flex:1;height:4px;border-radius:2px;background:#ddd}
-    .prog span.done{background:var(--blue)}
-    .prog span.now{background:var(--blue);opacity:.5}
+    .screen.active {
+      display: block
+    }
+
+    .center-screen.active {
+      display: flex;
+      min-height: 100vh;
+      align-items: center;
+      justify-content: center;
+      padding: 24px
+    }
+
+    #step1.active {
+      background: linear-gradient(135deg, var(--blue) 0%, var(--blue-dark) 60%, #0a1628 100%)
+    }
+
+    /* Cards */
+    .card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 36px 32px;
+      width: 100%;
+      max-width: 460px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, .1)
+    }
+
+    #step1 .card {
+      box-shadow: 0 20px 60px rgba(0, 0, 0, .3)
+    }
+
+    .logo-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 8px
+    }
+
+    .logo-icon {
+      width: 48px;
+      height: 48px;
+      background: var(--blue);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: 700;
+      color: #fff;
+      font-family: Georgia, serif;
+      flex-shrink: 0
+    }
+
+    .card h1 {
+      font-size: 20px;
+      color: var(--blue)
+    }
+
+    .card .sub {
+      font-size: 13px;
+      color: var(--muted);
+      margin: 4px 0 24px
+    }
+
+    /* Steps indicator */
+    .steps-bar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px
+    }
+
+    .step-dot {
+      flex: 1;
+      height: 4px;
+      border-radius: 2px;
+      background: #ddd
+    }
+
+    .step-dot.done {
+      background: var(--blue)
+    }
+
+    .step-dot.active {
+      background: var(--blue);
+      opacity: .6
+    }
 
     /* Fields */
-    .fld{margin-bottom:14px}
-    .fld label{display:block;font-size:13px;font-weight:600;color:#444;margin-bottom:5px}
-    .fld input,.fld textarea{
-      width:100%;padding:11px 13px;font-size:14px;border:1.5px solid #ddd;border-radius:8px;
-      font-family:inherit;background:#fafafa;outline:none;transition:border .2s,box-shadow .2s;
+    .field {
+      margin-bottom: 16px
     }
-    .fld input:focus,.fld textarea:focus{border-color:var(--blue);background:#fff;box-shadow:0 0 0 3px rgba(30,77,140,.08)}
-    .fld textarea{min-height:68px;resize:vertical}
-    .fld-err{color:var(--red-dark);font-size:12px;margin-top:3px;display:none}
+
+    .field label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #444;
+      margin-bottom: 6px
+    }
+
+    .field input,
+    .field textarea {
+      width: 100%;
+      padding: 12px 14px;
+      font-size: 14px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-family: inherit;
+      background: #fafafa;
+      outline: none;
+      transition: border .2s;
+    }
+
+    .field input:focus,
+    .field textarea:focus {
+      border-color: var(--blue);
+      background: #fff
+    }
+
+    .field textarea {
+      min-height: 72px;
+      resize: vertical
+    }
+
+    .error-msg {
+      color: var(--red-dark);
+      font-size: 12px;
+      margin-top: 4px;
+      display: none
+    }
 
     /* Buttons */
-    .btn{
-      display:block;width:100%;padding:13px 20px;font-size:14px;font-weight:700;
-      border:none;border-radius:8px;cursor:pointer;font-family:inherit;transition:all .2s;text-align:center;
+    .btn {
+      padding: 14px 24px;
+      font-size: 15px;
+      font-weight: 700;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all .2s;
+      width: 100%
     }
-    .btn-p{color:#fff;background:var(--blue)}
-    .btn-p:hover{background:var(--blue-dark)}
-    .btn-o{color:var(--blue);background:#fff;border:1.5px solid #ddd;margin-top:8px}
-    .btn-o:hover{background:#f5f5f5}
-    .btn:disabled{opacity:.45;cursor:not-allowed}
 
-    /* Date cards */
-    .dg{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:18px}
-    .dc{
-      padding:14px 10px;border:2px solid var(--border);border-radius:10px;text-align:center;
-      cursor:pointer;transition:all .15s;background:#fafafa;user-select:none;
+    .btn-primary {
+      color: #fff;
+      background: var(--blue)
     }
-    .dc:hover:not(.dis){border-color:var(--blue);background:var(--blue-light)}
-    .dc.sel{border-color:var(--blue);background:var(--blue-light);box-shadow:0 0 0 3px rgba(30,77,140,.12)}
-    .dc .dn{font-size:14px;font-weight:700;color:var(--text)}
-    .dc .dd{font-size:12px;color:var(--muted);margin-top:2px}
-    .dc .sc{font-size:11px;margin-top:5px;font-weight:600}
-    .dc .sc.av{color:var(--green-accent)}
-    .dc .sc.na{color:var(--red-dark)}
-    .dc.dis{opacity:.35;cursor:not-allowed;pointer-events:none}
 
-    /* Time cards */
-    .tg{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:18px}
-    @media(min-width:480px){.tg{grid-template-columns:repeat(3,1fr)}}
-    .tc{
-      padding:12px 6px;border:2px solid var(--border);border-radius:8px;text-align:center;
-      cursor:pointer;transition:all .15s;font-size:13px;font-weight:600;user-select:none;
+    .btn-primary:hover {
+      background: var(--blue-dark)
     }
-    .tc.op{background:var(--green);border-color:#c8e6c9}
-    .tc.op:hover{border-color:var(--green-accent);background:#c8e6c9}
-    .tc.tk{background:var(--red);border-color:#ef9a9a;cursor:not-allowed;opacity:.55}
-    .tc.yr{background:var(--mine);border-color:var(--mine-dark)}
-    .tc.sl{border-color:var(--blue);background:var(--blue-light);box-shadow:0 0 0 3px rgba(30,77,140,.12)}
-    .tc .st{font-size:10px;font-weight:400;color:var(--muted);margin-top:2px}
+
+    .btn-outline {
+      color: var(--blue);
+      background: #fff;
+      border: 1px solid #ddd
+    }
+
+    .btn-outline:hover {
+      background: #f5f5f5
+    }
+
+    .btn:disabled {
+      opacity: .5;
+      cursor: not-allowed
+    }
+
+    /* Date picker grid */
+    .date-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-bottom: 20px
+    }
+
+    .date-card {
+      padding: 16px 12px;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      text-align: center;
+      cursor: pointer;
+      transition: all .15s;
+      background: #fafafa;
+    }
+
+    .date-card:hover {
+      border-color: var(--blue);
+      background: var(--blue-light)
+    }
+
+    .date-card.selected {
+      border-color: var(--blue);
+      background: var(--blue-light);
+      box-shadow: 0 0 0 3px rgba(30, 77, 140, .15)
+    }
+
+    .date-card .day-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text)
+    }
+
+    .date-card .day-date {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px
+    }
+
+    .date-card .slot-count {
+      font-size: 11px;
+      color: var(--green-accent);
+      margin-top: 6px;
+      font-weight: 600
+    }
+
+    .date-card.disabled {
+      opacity: .4;
+      cursor: not-allowed;
+      pointer-events: none
+    }
+
+    /* Time slot grid */
+    .time-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin-bottom: 20px
+    }
+
+    @media(min-width:500px) {
+      .time-grid {
+        grid-template-columns: repeat(3, 1fr)
+      }
+    }
+
+    .time-card {
+      padding: 14px 8px;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      text-align: center;
+      cursor: pointer;
+      transition: all .15s;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .time-card.open {
+      background: var(--green);
+      border-color: #c8e6c9
+    }
+
+    .time-card.open:hover {
+      border-color: var(--green-accent);
+      background: #c8e6c9
+    }
+
+    .time-card.taken {
+      background: var(--red);
+      border-color: #ef9a9a;
+      cursor: not-allowed;
+      opacity: .6
+    }
+
+    .time-card.yours {
+      background: var(--mine);
+      border-color: var(--mine-dark)
+    }
+
+    .time-card.selected {
+      border-color: var(--blue);
+      background: var(--blue-light);
+      box-shadow: 0 0 0 3px rgba(30, 77, 140, .15)
+    }
+
+    .time-card .status {
+      font-size: 10px;
+      font-weight: 400;
+      color: var(--muted);
+      margin-top: 2px
+    }
 
     /* Confirmation */
-    .cc{text-align:center;max-width:480px}
-    .cc .ck{font-size:48px;margin-bottom:10px}
-    .cc h2{font-size:21px;color:var(--blue);margin-bottom:5px}
-    .cc .st{font-size:13px;color:var(--muted);margin-bottom:20px}
-    .db{background:#f8f9fb;border-radius:8px;padding:14px;margin-bottom:16px;text-align:left;border:1px solid #e8eaed}
-    .dr{display:flex;justify-content:space-between;padding:4px 0;font-size:13px;border-bottom:1px solid #f0f0f0;gap:8px}
-    .dr:last-child{border-bottom:none}
-    .dr .l{font-weight:600;color:var(--muted);flex-shrink:0}
-    .dr .v{text-align:right;word-break:break-word}
-    .es{padding:12px;border-radius:8px;margin-bottom:16px;text-align:left;font-size:12px;line-height:1.5}
-    .es-ok{background:#e8f5e9;border:1px solid #c8e6c9;color:#2e7d32}
-    .es-no{background:#fff3e0;border:1px solid #ffe0b2;color:#e65100}
+    .confirm-card {
+      text-align: center;
+      max-width: 480px
+    }
 
-    /* Loading & toast */
-    .ov{position:fixed;inset:0;background:rgba(240,242,245,.93);display:none;align-items:center;justify-content:center;z-index:100;flex-direction:column;gap:10px}
-    .ov.on{display:flex}
-    .sp{width:32px;height:32px;border:3px solid #ddd;border-top-color:var(--blue);border-radius:50%;animation:spin .6s linear infinite}
-    .lt{font-size:13px;color:var(--muted)}
-    @keyframes spin{to{transform:rotate(360deg)}}
-    .tt{
-      position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#333;color:#fff;
-      padding:10px 22px;border-radius:8px;font-size:13px;z-index:200;display:none;max-width:90vw;text-align:center;
+    .confirm-card .check {
+      font-size: 52px;
+      margin-bottom: 12px
+    }
+
+    .confirm-card h2 {
+      font-size: 22px;
+      color: var(--blue);
+      margin-bottom: 6px
+    }
+
+    .confirm-card .sub-text {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 24px
+    }
+
+    .details-box {
+      background: #f8f9fb;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 20px;
+      text-align: left;
+      border: 1px solid #e8eaed
+    }
+
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 5px 0;
+      font-size: 13px;
+      border-bottom: 1px solid #f0f0f0
+    }
+
+    .detail-row:last-child {
+      border-bottom: none
+    }
+
+    .detail-row .lbl {
+      font-weight: 600;
+      color: var(--muted);
+      flex-shrink: 0;
+      margin-right: 12px
+    }
+
+    .detail-row .val {
+      text-align: right;
+      word-break: break-word
+    }
+
+    .email-status {
+      padding: 14px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      text-align: left;
+      font-size: 12px;
+      line-height: 1.6
+    }
+
+    .email-ok {
+      background: #e8f5e9;
+      border: 1px solid #c8e6c9;
+      color: #2e7d32
+    }
+
+    .email-fail {
+      background: #fff3e0;
+      border: 1px solid #ffe0b2;
+      color: #e65100
+    }
+
+    /* Loading & Toast */
+    .loading-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(240, 242, 245, .92);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      flex-direction: column;
+      gap: 12px
+    }
+
+    .loading-overlay.on {
+      display: flex
+    }
+
+    .spinner {
+      width: 36px;
+      height: 36px;
+      border: 3px solid #ddd;
+      border-top-color: var(--blue);
+      border-radius: 50%;
+      animation: spin .6s linear infinite
+    }
+
+    .loading-text {
+      font-size: 13px;
+      color: var(--muted)
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg)
+      }
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #333;
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 13px;
+      z-index: 200;
+      display: none
+    }
+
+    /* Calendar UI */
+    .cal-container {
+      margin-bottom: 20px;
+    }
+
+    .cal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .cal-month {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--blue);
+    }
+
+    .cal-nav {
+      display: flex;
+      gap: 6px;
+    }
+
+    .cal-btn {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all .15s;
+    }
+
+    .cal-btn:hover {
+      background: #f5f5f5;
+      border-color: var(--blue);
+      color: var(--blue);
+    }
+
+    .cal-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+    }
+
+    .cal-day-label {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--muted);
+      text-align: center;
+      padding-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .cal-item {
+      aspect-ratio: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      cursor: pointer;
+      position: relative;
+      transition: all .15s;
+      border: 1px solid transparent;
+      user-select: none;
+    }
+
+    .cal-num {
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .cal-item.other {
+      opacity: 0.3;
+      pointer-events: none;
+    }
+
+    .cal-item.past {
+      opacity: 0.2;
+      pointer-events: none;
+      background: #f5f5f5;
+    }
+
+    .cal-item.restricted {
+      background: #f9f9f9;
+      color: #ccc;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    .cal-item.selectable {
+      background: #fff;
+      border-color: #f0f0f0;
+    }
+
+    .cal-item.selectable:hover {
+      border-color: var(--blue);
+      background: var(--blue-light);
+    }
+
+    .cal-item.selected {
+      background: var(--blue);
+      color: #fff;
+      border-color: var(--blue);
+      box-shadow: 0 4px 12px rgba(30, 77, 140, 0.25);
+      transform: translateY(-1px);
+    }
+
+    .cal-item.today {
+      border-color: var(--blue);
+      border-style: dashed;
+    }
+
+    .avail-text {
+      font-size: 8px;
+      margin-top: 2px;
+      font-weight: 600;
+      color: var(--green-accent);
+    }
+
+    .cal-item.selected .avail-text {
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    .cal-item.full .avail-text {
+      color: var(--red-dark);
     }
   </style>
 </head>
+
 <body>
 
-<div class="ov" id="ov"><div class="sp"></div><div class="lt" id="lt">Loading...</div></div>
-<div class="tt" id="tt"></div>
+  <div class="loading-overlay" id="loading">
+    <div class="spinner"></div>
+    <div class="loading-text" id="loading-text">Loading...</div>
+  </div>
+  <div class="toast" id="toast"></div>
 
+  <!-- ==================== STEP 1: STUDENT INFO ==================== -->
+  <div id="step1" class="screen center-screen active">
+    <div class="card">
+      <div class="logo-row">
+        <div class="logo-icon">D</div>
+        <h1>DePaul Slot Booking</h1>
+      </div>
+      <p class="sub">Enter your details to book an appointment</p>
 
-<!-- ============ STEP 1: STUDENT INFO ============ -->
-<div id="s1" class="scr scr-center on">
-  <div class="card">
-    <div class="logo-row"><div class="logo-icon">D</div><h1>DePaul Slot Booking</h1></div>
-    <p class="sub">Enter your details to book an appointment</p>
-    <div class="prog"><span class="now"></span><span></span><span></span></div>
+      <div class="steps-bar">
+        <div class="step-dot active"></div>
+        <div class="step-dot"></div>
+        <div class="step-dot"></div>
+      </div>
 
-    <div class="fld"><label>Full Name *</label><input id="fn" placeholder="e.g. Dhruvik Patel" autocomplete="name" /></div>
-    <div class="fld"><label>DePaul Student ID *</label><input id="fi" placeholder="e.g. 2487651" autocomplete="off" /></div>
-    <div class="fld">
-      <label>DePaul Email *</label>
-      <input id="fe" type="email" placeholder="e.g. dpatel@depaul.edu" autocomplete="email" />
-      <div class="fld-err" id="ee">Please use a @depaul.edu email</div>
+      <div class="field">
+        <label>Full Name *</label>
+        <input type="text" id="f-name" placeholder="e.g. Dhruvik Patel" />
+      </div>
+      <div class="field">
+        <label>DePaul Student ID *</label>
+        <input type="text" id="f-id" placeholder="e.g. 2487651" />
+      </div>
+      <div class="field">
+        <label>DePaul Email *</label>
+        <input type="email" id="f-email" placeholder="e.g. dpatel@depaul.edu" />
+        <div class="error-msg" id="email-err">Please use a @depaul.edu email</div>
+      </div>
+      <div class="field">
+        <label>Course *</label>
+        <input type="text" id="f-course" placeholder="e.g. CSC 555 - Mining Big Data" />
+      </div>
+      <div class="field">
+        <label>Subject *</label>
+        <input type="text" id="f-subject" placeholder="e.g. Project Review, Office Hours" />
+      </div>
+      <div class="field">
+        <label>Reason *</label>
+        <textarea id="f-reason" placeholder="Brief description of why you need this slot..."></textarea>
+      </div>
+
+      <button class="btn btn-primary" onclick="goStep2()">Next — Select a Date →</button>
+      <p style="text-align:center;margin-top:16px;font-size:11px;color:#999"><a href="admin.html" style="color:#999;text-decoration:none">Admin Portal</a></p>
     </div>
-    <div class="fld"><label>Course *</label><input id="fc" placeholder="e.g. CSC 555 - Mining Big Data" /></div>
-    <div class="fld"><label>Subject *</label><input id="fs" placeholder="e.g. Project Review, Office Hours" /></div>
-    <div class="fld"><label>Reason *</label><textarea id="fr" placeholder="Brief description of why you need this slot..."></textarea></div>
-
-    <button class="btn btn-p" onclick="toStep2()">Next — Select a Date →</button>
   </div>
-</div>
 
+  <!-- ==================== STEP 2: SELECT DATE ==================== -->
+  <div id="step2" class="screen center-screen">
+    <div class="card">
+      <div class="logo-row">
+        <div class="logo-icon">D</div>
+        <h1>Select a Date</h1>
+      </div>
+      <p class="sub" id="step2-user"></p>
 
-<!-- ============ STEP 2: SELECT DATE ============ -->
-<div id="s2" class="scr scr-center">
-  <div class="card">
-    <div class="logo-row"><div class="logo-icon">D</div><h1>Select a Date</h1></div>
-    <p class="sub" id="s2u"></p>
-    <div class="prog"><span class="done"></span><span class="now"></span><span></span></div>
-    <div class="dg" id="dg"></div>
-    <button class="btn btn-p" id="b2" disabled onclick="toStep3()">Next — Choose a Time Slot →</button>
-    <button class="btn btn-o" onclick="go('s1')">← Back</button>
+      <div class="steps-bar">
+        <div class="step-dot done"></div>
+        <div class="step-dot active"></div>
+        <div class="step-dot"></div>
+      </div>
+
+      <div class="cal-container">
+        <div class="cal-header">
+          <div class="cal-month" id="cal-month-name">April 2026</div>
+          <div class="cal-nav">
+            <button class="cal-btn" onclick="changeMonth(-1)">←</button>
+            <button class="cal-btn" onclick="changeMonth(1)">→</button>
+          </div>
+        </div>
+        <div class="cal-grid" id="calendar-grid"></div>
+      </div>
+
+      <button class="btn btn-primary" id="btn-to-step3" disabled onclick="goStep3()">Next — Choose a Time Slot
+        →</button>
+      <button class="btn btn-outline" style="margin-top:8px" onclick="showScreen('step1')">← Back</button>
+    </div>
   </div>
-</div>
 
+  <!-- ==================== STEP 3: SELECT TIME SLOT ==================== -->
+  <div id="step3" class="screen center-screen">
+    <div class="card" style="max-width:520px">
+      <div class="logo-row">
+        <div class="logo-icon">D</div>
+        <h1>Choose Your Slot</h1>
+      </div>
+      <p class="sub" id="step3-info"></p>
 
-<!-- ============ STEP 3: SELECT TIME ============ -->
-<div id="s3" class="scr scr-center">
-  <div class="card" style="max-width:520px">
-    <div class="logo-row"><div class="logo-icon">D</div><h1>Choose Your Slot</h1></div>
-    <p class="sub" id="s3u"></p>
-    <div class="prog"><span class="done"></span><span class="done"></span><span class="now"></span></div>
-    <div class="tg" id="tg"></div>
-    <button class="btn btn-p" id="b3" disabled onclick="book()">Confirm Booking</button>
-    <button class="btn btn-o" onclick="go('s2')">← Back to Dates</button>
+      <div class="steps-bar">
+        <div class="step-dot done"></div>
+        <div class="step-dot done"></div>
+        <div class="step-dot active"></div>
+      </div>
+
+      <div class="time-grid" id="time-grid"></div>
+
+      <button class="btn btn-primary" id="btn-book" disabled onclick="submitBooking()">Confirm Booking</button>
+      <button class="btn btn-outline" style="margin-top:8px" onclick="showScreen('step2')">← Back to Dates</button>
+    </div>
   </div>
-</div>
 
-
-<!-- ============ STEP 4: CONFIRMATION ============ -->
-<div id="s4" class="scr scr-center">
-  <div class="card cc">
-    <div class="ck">✅</div>
-    <h2>Booking Confirmed!</h2>
-    <p class="st">Your appointment has been saved.</p>
-    <div class="db" id="cd"></div>
-    <div id="eb"></div>
-    <button class="btn btn-p" onclick="again()">Book Another Slot</button>
-    <button class="btn btn-o" onclick="location.reload()">Start Over</button>
+  <!-- ==================== STEP 4: CONFIRMATION ==================== -->
+  <div id="step4" class="screen center-screen">
+    <div class="card confirm-card">
+      <div class="check">✅</div>
+      <h2>Booking Confirmed!</h2>
+      <p class="sub-text">Your appointment has been saved.</p>
+      <div class="details-box" id="confirm-details"></div>
+      <div id="email-status-box"></div>
+      <button class="btn btn-primary" onclick="bookAnother()">Book Another Slot</button>
+    </div>
   </div>
-</div>
 
 
-<script>
-// ================================================================
-// ▼▼▼ CONFIG — UPDATE THESE VALUES FOR YOUR REPO ▼▼▼
-// ================================================================
-const C = {
-  // ---- GitHub (required for saving bookings) ----
-  GH_OWNER:  'betahubdepaul-byte',   // ← your GitHub username
-  GH_REPO:   'depaul-slot-booking',    // ← your repo name
-  GH_BRANCH: 'main',
-  GH_PATH:   'data/bookings.json',
-  GH_TOKEN:  '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',                       // ← your fine-grained PAT
-
-  // Note: Emails are securely sent using a GitHub Action and send_email.py
-  // Make sure to add GMAIL_EMAIL, GMAIL_APP_PASSWORD, and ADMIN_EMAIL to your GitHub Repository Secrets.
-};
-// ================================================================
-// ▲▲▲ END CONFIG ▲▲▲
-// ================================================================
-
-
-// --- State ---
-let stu = {};          // student info
-let bk = [];           // all bookings array
-let sha = null;        // GitHub file SHA (needed for updates)
-let selDate = null;    // selected date object
-let selSlot = null;    // selected time slot object
-
-
-// ================================================================
-// STEP 1 → 2: Validate info, load bookings, show dates
-// ================================================================
-function toStep2() {
-  const n = g('fn'), i = g('fi'), e = g('fe'), c = g('fc'), s = g('fs'), r = g('fr');
-
-  // Validate all fields filled
-  if (!n||!i||!e||!c||!s||!r) { toast('Please fill in all fields'); return; }
-
-  // Validate email
-  if (!e.toLowerCase().endsWith('@depaul.edu')) {
-    document.getElementById('ee').style.display = 'block';
-    document.getElementById('fe').focus();
-    return;
-  }
-  document.getElementById('ee').style.display = 'none';
-
-  stu = { name:n, id:i, email:e.toLowerCase(), course:c, subject:s, reason:r };
-  selDate = null;
-  selSlot = null;
-
-  loadBk().then(() => {
-    renderDates();
-    document.getElementById('s2u').textContent = n + ' · ' + stu.email;
-    go('s2');
-  });
-}
-
-function g(id) { return document.getElementById(id).value.trim(); }
-
-
-// ================================================================
-// STEP 2: DATE SELECTION (Mon–Thu of current week)
-// ================================================================
-const DAYS = ['Monday','Tuesday','Wednesday','Thursday'];
-
-function weekDates() {
-  const now = new Date();
-  const wd = now.getDay(); // 0=Sun
-  const mon = new Date(now);
-  mon.setDate(now.getDate() - (wd === 0 ? 6 : wd - 1));
-  mon.setHours(0,0,0,0);
-
-  return DAYS.map((name, i) => {
-    const d = new Date(mon);
-    d.setDate(mon.getDate() + i);
-    const yyyy = d.getFullYear();
-    const mm = String(d.getMonth()+1).padStart(2,'0');
-    const dd = String(d.getDate()).padStart(2,'0');
-    return {
-      name,
-      iso: `${yyyy}-${mm}-${dd}`,
-      display: d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'}),
-      shortDisplay: d.toLocaleDateString('en-US',{month:'short',day:'numeric'}),
+  <script>
+    // ================================================================
+    // CONFIG — UPDATE THESE FOR YOUR SETUP
+    // ================================================================
+    const CONFIG = {
+      GITHUB_OWNER: 'betahubdepaul-byte',
+      GITHUB_REPO: 'depaul-slot-booking',
+      GITHUB_BRANCH: 'main',
+      DATA_PATH: 'data/bookings.json',
+      GT_TOKEN: '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',
+      ADMIN_EMAIL: 'dmalaviy@depaul.edu',
     };
-  });
-}
-
-function slotsFor(iso) {
-  return 12 - bk.filter(b => b.dayDate === iso).length; // 12 total slots per day
-}
-
-function renderDates() {
-  const days = weekDates();
-  const today = new Date();
-  today.setHours(0,0,0,0);
-  const todayISO = today.toISOString().split('T')[0];
-
-  let h = '';
-  days.forEach(d => {
-    const avail = slotsFor(d.iso);
-    const past = d.iso < todayISO;
-    const full = avail <= 0;
-    const off = past || full;
-    const sel = selDate && selDate.iso === d.iso;
-
-    h += `<div class="dc${off?' dis':''}${sel?' sel':''}" ${off?'':`onclick="pickDate('${d.name}','${d.iso}','${d.display}')"`}>
-      <div class="dn">${d.name}</div>
-      <div class="dd">${d.shortDisplay}</div>
-      <div class="sc ${off?'na':'av'}">${past?'Past':full?'Full':avail+' slots open'}</div>
-    </div>`;
-  });
-  document.getElementById('dg').innerHTML = h;
-  document.getElementById('b2').disabled = !selDate;
-}
-
-function pickDate(name, iso, display) {
-  selDate = { name, iso, display };
-  selSlot = null;
-  renderDates();
-}
 
 
-// ================================================================
-// STEP 2 → 3: Show time slots for selected date
-// ================================================================
-function toStep3() {
-  if (!selDate) return;
-  renderTimes();
-  document.getElementById('s3u').textContent =
-    selDate.name + ', ' + selDate.display + ' · ' + stu.name;
-  go('s3');
-}
+    // ================================================================
+    // STATE
+    // ================================================================
+    let student = {};
+    let bookings = [];
+    let fileSha = null;
+    let selectedDate = null;  // { name, date, display }
+    let selectedSlot = null;  // { id, range }
+    let viewMonth = new Date().getMonth();
+    let viewYear = new Date().getFullYear();
 
 
-// ================================================================
-// STEP 3: TIME SLOT SELECTION (10:00–16:00, 30-min each)
-// ================================================================
-function allSlots() {
-  const s = [];
-  for (let h=10; h<16; h++) {
-    for (let m=0; m<60; m+=30) {
-      const sh=String(h).padStart(2,'0'), sm=String(m).padStart(2,'0');
-      const et=h*60+m+30;
-      const eh=String(Math.floor(et/60)).padStart(2,'0'), em=String(et%60).padStart(2,'0');
-      s.push({ id:`${sh}${sm}`, range:`${sh}:${sm} – ${eh}:${em}` });
+    // ================================================================
+    // STEP 1 → STEP 2
+    // ================================================================
+    function goStep2() {
+      const name = v('f-name');
+      const id = v('f-id');
+      const email = v('f-email');
+      const course = v('f-course');
+      const subject = v('f-subject');
+      const reason = v('f-reason');
+
+      if (!name || !id || !email || !course || !subject || !reason) {
+        toast('Please fill in all fields'); return;
+      }
+      if (!email.endsWith('@depaul.edu')) {
+        document.getElementById('email-err').style.display = 'block'; return;
+      }
+      document.getElementById('email-err').style.display = 'none';
+
+      student = { name, id, email, course, subject, reason };
+      selectedDate = null;
+      selectedSlot = null;
+
+      loadBookings().then(() => {
+        renderCalendar();
+        document.getElementById('step2-user').textContent = `${name} · ${email}`;
+        showScreen('step2');
+      });
     }
-  }
-  return s;
-}
 
-function renderTimes() {
-  const slots = allSlots();
-  let h = '';
-  slots.forEach(sl => {
-    const b = bk.find(x => x.dayDate===selDate.iso && x.slotId===sl.id);
-    const yours = b && b.email===stu.email;
-    const sel = selSlot && selSlot.id===sl.id;
+    function v(id) { return document.getElementById(id).value.trim(); }
 
-    if (yours) {
-      h += `<div class="tc yr">${sl.range}<div class="st">Your booking</div></div>`;
-    } else if (b) {
-      h += `<div class="tc tk">${sl.range}<div class="st">Taken</div></div>`;
-    } else {
-      h += `<div class="tc ${sel?'sl':'op'}" onclick="pickTime('${sl.id}','${sl.range}')">
-        ${sl.range}<div class="st">${sel?'Selected ✓':'Available'}</div></div>`;
+
+    // ================================================================
+    // STEP 2: CALENDAR SELECTION
+    // ================================================================
+    function changeMonth(delta) {
+      viewMonth += delta;
+      if (viewMonth < 0) { viewMonth = 11; viewYear--; }
+      if (viewMonth > 11) { viewMonth = 0; viewYear++; }
+      renderCalendar();
     }
-  });
-  document.getElementById('tg').innerHTML = h;
-  document.getElementById('b3').disabled = !selSlot;
-}
 
-function pickTime(id, range) {
-  selSlot = { id, range };
-  renderTimes();
-}
+    function countAvailable(dayDate) {
+      const totalSlots = 12; // 10:00-16:00 in 30-min = 12 slots
+      const booked = bookings.filter(b => b.dayDate === dayDate).length;
+      return totalSlots - booked;
+    }
 
+    function renderCalendar() {
+      const container = document.getElementById('calendar-grid');
+      if (!container) return;
 
-// ================================================================
-// BOOK — save to GitHub + send email
-// ================================================================
-async function book() {
-  if (!selDate || !selSlot) return;
+      const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+      document.getElementById('cal-month-name').textContent = `${monthNames[viewMonth]} ${viewYear}`;
 
-  // --- 1. Re-fetch bookings to prevent double-booking ---
-  ld(true, 'Checking availability...');
-  try {
-    await loadBk();
-  } catch(e) {
-    console.warn('Re-fetch failed, proceeding with local data');
-  }
+      const firstDay = new Date(viewYear, viewMonth, 1).getDay();
+      const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
 
-  const conflict = bk.find(x => x.dayDate===selDate.iso && x.slotId===selSlot.id);
-  if (conflict) {
-    ld(false);
-    toast('This slot was just booked! Please choose another.');
-    renderTimes();
-    return;
-  }
+      let html = '';
+      ['S', 'M', 'T', 'W', 'T', 'F', 'S'].forEach(d => html += `<div class="cal-day-label">${d}</div>`);
 
-  // --- 2. Create booking object ---
-  const entry = {
-    id:         Date.now().toString(),
-    name:       stu.name,
-    email:      stu.email,
-    studentId:  stu.id,
-    course:     stu.course,
-    subject:    stu.subject,
-    reason:     stu.reason,
-    day:        selDate.name,
-    dayDate:    selDate.iso,
-    dayDisplay: selDate.display,
-    slotId:     selSlot.id,
-    timeRange:  selSlot.range,
-    bookedAt:   new Date().toISOString(),
-  };
+      // Fill empty days for current month offset
+      for (let i = 0; i < firstDay; i++) html += '<div class="cal-item other"></div>';
 
-  bk.push(entry);
+      for (let d = 1; d <= daysInMonth; d++) {
+        const curDate = new Date(viewYear, viewMonth, d);
+        const dateStr = curDate.toISOString().split('T')[0];
+        const isPast = curDate < today;
+        const dayOfWeek = curDate.getDay();
+        // Fri (5), Sat (6), Sun (0) restricted per original logic (Mon-Thu only)
+        const isRestricted = dayOfWeek === 0 || dayOfWeek === 5 || dayOfWeek === 6;
 
-  // --- 3. Save to GitHub ---
-  ld(true, 'Saving booking...');
-  let ghOk = false;
-  try {
-    ghOk = await saveBk(entry);
-  } catch(e) {
-    console.error('GitHub save error:', e);
-  }
+        const avail = countAvailable(dateStr);
+        const sel = selectedDate && selectedDate.date === dateStr;
+        const isToday = curDate.getTime() === today.getTime();
 
-  // --- 4. Send confirmation email ---
-  ld(true, 'Sending confirmation email...');
-  let emOk = false;
-  try {
-    emOk = await sendMail(entry);
-  } catch(e) {
-    console.error('Email error:', e);
-  }
+        let cls = 'cal-item ';
+        if (isPast) cls += 'past';
+        else if (isRestricted) cls += 'restricted';
+        else {
+          cls += 'selectable';
+          if (avail <= 0) cls += ' full';
+          if (sel) cls += ' selected';
+        }
+        if (isToday) cls += ' today';
 
-  ld(false);
+        const dayName = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][dayOfWeek];
+        const displayDate = curDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        const clickAttr = (isPast || isRestricted || avail <= 0) ? '' : `onclick="selectDate('${dayName}','${dateStr}','${displayDate}')"`;
 
-  // --- 5. Show confirmation ---
-  document.getElementById('cd').innerHTML = [
-    ['Name', entry.name],
-    ['Email', entry.email],
-    ['Student ID', entry.studentId],
-    ['Course', entry.course],
-    ['Subject', entry.subject],
-    ['Reason', entry.reason],
-    ['Date', entry.day + ', ' + entry.dayDisplay],
-    ['Time Slot', entry.timeRange],
-    ['Booked At', new Date(entry.bookedAt).toLocaleString()],
-  ].map(([l,v])=>`<div class="dr"><span class="l">${l}</span><span class="v">${v}</span></div>`).join('');
+        html += `
+      <div class="${cls}" ${clickAttr}>
+        <div class="cal-num">${d}</div>
+        ${(!isPast && !isRestricted) ? `<div class="avail-text">${avail <= 0 ? 'Full' : avail + ' open'}</div>` : ''}
+      </div>`;
+      }
 
-  let statusHTML = '';
-  if (ghOk && emOk) {
-    statusHTML = `<div class="es es-ok"><strong>✅ Saved to GitHub & email triggered!</strong><br>Confirmation will be sent to ${entry.email} via GitHub Actions.</div>`;
-  } else if (ghOk && !emOk) {
-    statusHTML = `<div class="es es-no"><strong>✅ Saved to GitHub</strong><br>⚠️ Email trigger failed. Please check your GitHub token. Booking is still saved.</div>`;
-  } else if (!ghOk && emOk) {
-    statusHTML = `<div class="es es-no"><strong>⚠️ GitHub save failed</strong> — check token. Email trigger was sent.</div>`;
-  } else {
-    statusHTML = `<div class="es es-no"><strong>⚠️ Saved locally only</strong><br>Set GitHub token in the CONFIG section of index.html to enable saving and emails.</div>`;
-  }
-  document.getElementById('eb').innerHTML = statusHTML;
+      container.innerHTML = html;
+      document.getElementById('btn-to-step3').disabled = !selectedDate;
+    }
 
-  go('s4');
-}
-
-function again() {
-  selDate = null;
-  selSlot = null;
-  loadBk().then(() => { renderDates(); go('s2'); });
-}
+    function selectDate(name, date, display) {
+      selectedDate = { name, date, display };
+      selectedSlot = null;
+      renderCalendar();
+    }
 
 
-// ================================================================
-// GITHUB API — Read & write data/bookings.json
-// ================================================================
-function ghUrl() {
-  return `https://api.github.com/repos/${C.GH_OWNER}/${C.GH_REPO}/contents/${C.GH_PATH}`;
-}
-function ghH() {
-  const h = { 'Accept':'application/vnd.github.v3+json' };
-  if (C.GH_TOKEN) h['Authorization'] = 'Bearer ' + C.GH_TOKEN;
-  return h;
-}
+    // ================================================================
+    // STEP 2 → STEP 3
+    // ================================================================
+    function goStep3() {
+      if (!selectedDate) return;
+      renderTimeGrid();
+      document.getElementById('step3-info').textContent =
+        `${selectedDate.name}, ${selectedDate.display} · ${student.name}`;
+      showScreen('step3');
+    }
 
-async function loadBk() {
-  ld(true, 'Loading bookings...');
-  try {
-    // Try GitHub API first (works with token, gives us SHA)
-    if (C.GH_TOKEN) {
-      const r = await fetch(ghUrl()+'?ref='+C.GH_BRANCH, {headers:ghH()});
-      if (r.ok) {
-        const d = await r.json();
-        sha = d.sha;
-        const raw = atob(d.content.replace(/\n/g,''));
-        try { bk = JSON.parse(raw); } catch { bk = []; }
-        ld(false);
+
+    // ================================================================
+    // STEP 3: TIME SLOT SELECTION
+    // ================================================================
+    function getTimeSlots() {
+      const s = [];
+      for (let h = 10; h < 16; h++) {
+        for (let m = 0; m < 60; m += 30) {
+          const sh = String(h).padStart(2, '0');
+          const sm = String(m).padStart(2, '0');
+          const et = h * 60 + m + 30;
+          const eh = String(Math.floor(et / 60)).padStart(2, '0');
+          const em = String(et % 60).padStart(2, '0');
+          s.push({ range: `${sh}:${sm} – ${eh}:${em}`, id: `${sh}${sm}` });
+        }
+      }
+      return s;
+    }
+
+    function renderTimeGrid() {
+      const slots = getTimeSlots();
+      let html = '';
+
+      slots.forEach(sl => {
+        const bk = bookings.find(b => b.dayDate === selectedDate.date && b.slotId === sl.id);
+        const yours = bk && bk.email === student.email;
+        const sel = selectedSlot && selectedSlot.id === sl.id;
+
+        let cls = 'time-card ';
+        let statusText = '';
+        let onclick = '';
+
+        if (yours) {
+          cls += 'yours';
+          statusText = 'Your booking';
+        } else if (bk) {
+          cls += 'taken';
+          statusText = 'Taken';
+        } else {
+          cls += sel ? 'selected' : 'open';
+          statusText = sel ? 'Selected ✓' : 'Available';
+          onclick = `onclick="selectTime('${sl.id}','${sl.range}')"`;
+        }
+
+        html += `
+      <div class="${cls}" ${onclick}>
+        ${sl.range}
+        <div class="status">${statusText}</div>
+      </div>`;
+      });
+
+      document.getElementById('time-grid').innerHTML = html;
+      document.getElementById('btn-book').disabled = !selectedSlot;
+    }
+
+    function selectTime(id, range) {
+      selectedSlot = { id, range };
+      renderTimeGrid();
+    }
+
+
+    // ================================================================
+    // SUBMIT BOOKING
+    // ================================================================
+    async function submitBooking() {
+      if (!selectedDate || !selectedSlot) return;
+
+      setLoading(true, 'Checking availability...');
+
+      // Re-fetch to check conflicts
+      await loadBookings();
+      if (bookings.find(b => b.dayDate === selectedDate.date && b.slotId === selectedSlot.id)) {
+        setLoading(false);
+        toast('This slot was just booked by someone else!');
+        renderTimeGrid();
         return;
       }
-    }
-    // Fallback: raw URL (works for public repos without token)
-    await loadRaw();
-  } catch(e) {
-    console.warn('loadBk error:', e);
-    await loadRaw();
-  }
-  ld(false);
-}
 
-async function loadRaw() {
-  try {
-    const url = `https://raw.githubusercontent.com/${C.GH_OWNER}/${C.GH_REPO}/${C.GH_BRANCH}/${C.GH_PATH}?_=${Date.now()}`;
-    const r = await fetch(url);
-    if (r.ok) {
-      const text = await r.text();
-      try { bk = JSON.parse(text); } catch { bk = []; }
-    } else {
-      bk = [];
-    }
-  } catch { bk = []; }
-}
+      const booking = {
+        id: Date.now().toString(),
+        name: student.name,
+        email: student.email,
+        studentId: student.id,
+        course: student.course,
+        subject: student.subject,
+        reason: student.reason,
+        day: selectedDate.name,
+        dayDate: selectedDate.date,
+        dayDisplay: selectedDate.display,
+        slotId: selectedSlot.id,
+        timeRange: selectedSlot.range,
+        bookedAt: new Date().toISOString(),
+      };
 
-async function saveBk(entry) {
-  if (!C.GH_TOKEN) return false;
+      setLoading(true, 'Saving booking...');
+      await saveToGitHub(booking);
 
-  // Encode JSON as base64 safely (handles unicode)
-  const json = JSON.stringify(bk, null, 2);
-  const bytes = new TextEncoder().encode(json);
-  let binary = '';
-  bytes.forEach(b => binary += String.fromCharCode(b));
-  const content = btoa(binary);
+      setLoading(false);
 
-  const body = {
-    message: `📅 Booking: ${entry.name} — ${entry.day} ${entry.dayDisplay} ${entry.timeRange}`,
-    content,
-    branch: C.GH_BRANCH,
-  };
-  if (sha) body.sha = sha;
+      // Build confirmation
+      document.getElementById('confirm-details').innerHTML = [
+        ['Name', booking.name],
+        ['Email', booking.email],
+        ['Student ID', booking.studentId],
+        ['Course', booking.course],
+        ['Subject', booking.subject],
+        ['Reason', booking.reason],
+        ['Date', `${booking.day}, ${booking.dayDisplay}`],
+        ['Time Slot', booking.timeRange],
+        ['Booked At', new Date(booking.bookedAt).toLocaleString()],
+      ].map(([l, val]) =>
+        `<div class="detail-row"><span class="lbl">${l}</span><span class="val">${val}</span></div>`
+      ).join('');
 
-  try {
-    const r = await fetch(ghUrl(), {
-      method: 'PUT',
-      headers: { ...ghH(), 'Content-Type':'application/json' },
-      body: JSON.stringify(body),
-    });
+      document.getElementById('email-status-box').innerHTML = `<div class="email-status email-ok"><strong>Booking confirmed!</strong><br>Your appointment has been saved.</div>`;
+        ? `<div class="email-status email-ok">
+         <strong>Booking confirmed!</strong><br>
+         Confirmation sent to ${booking.email} and admin.
+       </div>`
+        : `<div class="email-status email-fail">
+         <strong>⚠️ Some issues occurred</strong><br>
+         Please contact admin to confirm.
+       </div>`;
 
-    if (r.ok) {
-      const d = await r.json();
-      sha = d.content.sha; // Update SHA for next write
-      return true;
+      showScreen('step4');
     }
 
-    // If 409 conflict (SHA mismatch), re-fetch and retry once
-    if (r.status === 409) {
-      console.warn('SHA conflict — refetching and retrying...');
-      await loadBk();
-      // Re-add entry if it got lost
-      if (!bk.find(x => x.id === entry.id)) bk.push(entry);
-      return await saveBkRetry(entry);
+    async function saveToGitHub(booking) {
+      try {
+        // Get current file SHA
+        const getRes = await fetch(
+          `https://api.github.com/repos/${CONFIG.GITHUB_OWNER}/${CONFIG.GITHUB_REPO}/contents/${CONFIG.DATA_PATH}`,
+          {
+            headers: {
+              'Authorization': `Bearer ${CONFIG.GT_TOKEN}`,
+              'Accept': 'application/vnd.github.v3+json'
+            }
+          }
+        );
+        
+        let sha = null;
+        if (getRes.ok) {
+          const getData = await getRes.json();
+          sha = getData.sha;
+        }
+
+        // Add booking to list
+        bookings.push(booking);
+
+        // Save
+        const content = btoa(encodeURIComponent(JSON.stringify(bookings, null, 2)));
+        const body = {
+          message: `Booking: ${booking.name} — ${booking.day} ${booking.dayDisplay}`,
+          content,
+          branch: CONFIG.GITHUB_BRANCH,
+        };
+        if (sha) body.sha = sha;
+
+        const saveRes = await fetch(
+          `https://api.github.com/repos/${CONFIG.GITHUB_OWNER}/${CONFIG.GITHUB_REPO}/contents/${CONFIG.DATA_PATH}`,
+          {
+            method: 'PUT',
+            headers: {
+              'Authorization': `Bearer ${CONFIG.GT_TOKEN}`,
+              'Accept': 'application/vnd.github.v3+json',
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(body),
+          }
+        );
+
+        if (!saveRes.ok) {
+          const error = await saveRes.json().catch(() => ({}));
+          toast('Failed to save booking');
+          console.error('Save error:', error);
+        }
+      } catch (e) {
+        console.error('Save error:', e);
+        toast('Network error');
+      }
     }
 
-    const err = await r.json().catch(()=>({}));
-    console.error('GitHub save error:', r.status, err);
-    return false;
-  } catch(e) {
-    console.error('GitHub network error:', e);
-    return false;
-  }
-}
-
-async function saveBkRetry(entry) {
-  const json = JSON.stringify(bk, null, 2);
-  const bytes = new TextEncoder().encode(json);
-  let binary = '';
-  bytes.forEach(b => binary += String.fromCharCode(b));
-  const content = btoa(binary);
-
-  const body = {
-    message: `📅 Booking: ${entry.name} — ${entry.day} ${entry.dayDisplay} ${entry.timeRange}`,
-    content,
-    branch: C.GH_BRANCH,
-  };
-  if (sha) body.sha = sha;
-
-  try {
-    const r = await fetch(ghUrl(), {
-      method: 'PUT',
-      headers: { ...ghH(), 'Content-Type':'application/json' },
-      body: JSON.stringify(body),
-    });
-    if (r.ok) {
-      const d = await r.json();
-      sha = d.content.sha;
-      return true;
+    function bookAnother() {
+      selectedDate = null;
+      selectedSlot = null;
+      loadBookings().then(() => {
+        renderCalendar();
+        showScreen('step2');
+      });
     }
-    return false;
-  } catch { return false; }
-}
 
+    // ================================================================
+    // GITHUB API — READ bookings.json
+    // ================================================================
 
-// ================================================================
-// EMAIL — via GitHub Actions Trigger
-// ================================================================
-async function sendMail(entry) {
-  if (!C.GH_TOKEN) return false;
-
-  try {
-    const r = await fetch(`https://api.github.com/repos/${C.GH_OWNER}/${C.GH_REPO}/dispatches`, {
-      method: 'POST',
-      headers: { ...ghH(), 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        event_type: 'send_email',
-        client_payload: entry
-      })
-    });
-    
-    // GitHub API returns 204 No Content for successful dispatch
-    if (r.ok || r.status === 204) {
-      console.log('Email trigger dispatched successfully');
-      return true;
-    } else {
-      const err = await r.json().catch(() => ({}));
-      console.error('Dispatch trigger error:', r.status, err);
-      return false;
+    async function loadBookings() {
+      setLoading(true, 'Loading bookings...');
+      try {
+        const url = `https://raw.githubusercontent.com/${CONFIG.GITHUB_OWNER}/${CONFIG.GITHUB_REPO}/${CONFIG.GITHUB_BRANCH}/${CONFIG.DATA_PATH}?t=${Date.now()}`;
+        const res = await fetch(url);
+        bookings = res.ok ? await res.json() : [];
+      } catch { bookings = []; }
+      setLoading(false);
     }
-  } catch(e) {
-    console.error('GitHub network error:', e);
-    return false;
-  }
-}
 
 
-// ================================================================
-// UTILITIES
-// ================================================================
-function go(id) {
-  document.querySelectorAll('.scr').forEach(s => s.classList.remove('on'));
-  document.getElementById(id).classList.add('on');
-  window.scrollTo({top:0,behavior:'smooth'});
-}
+    // ================================================================
+    // UTILITIES
+    // ================================================================
+    function showScreen(id) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      window.scrollTo(0, 0);
+    }
 
-function ld(on, txt) {
-  document.getElementById('ov').classList.toggle('on', on);
-  if (txt) document.getElementById('lt').textContent = txt;
-}
+    function setLoading(on, text) {
+      document.getElementById('loading').classList.toggle('on', on);
+      if (text) document.getElementById('loading-text').textContent = text;
+    }
 
-function toast(msg) {
-  const t = document.getElementById('tt');
-  t.textContent = msg;
-  t.style.display = 'block';
-  clearTimeout(t._t);
-  t._t = setTimeout(() => t.style.display = 'none', 4000);
-}
-</script>
+    function toast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.style.display = 'block';
+      setTimeout(() => t.style.display = 'none', 3500);
+    }
+  </script>
 </body>
+
 </html>
