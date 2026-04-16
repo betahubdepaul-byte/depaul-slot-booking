@@ -4,7 +4,7 @@ import os
 import urllib.request
 
 booking_data = os.environ.get('BOOKING_DATA', '{}')
-gh_token = os.environ.get('GH_TOKEN')
+gh_token = os.environ.get('GT_TOKEN')
 repo = os.environ.get('REPO')
 
 try:
