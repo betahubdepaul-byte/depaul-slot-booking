@@ -2,7 +2,7 @@ const CONFIG = {
   ADMIN_PASSWORD: 'admin123',
   GITHUB_OWNER: 'betahubdepaul-byte',
   GITHUB_REPO: 'depaul-slot-booking',
-  GITHUB_BRANCH: 'dhruvik',
+  GITHUB_BRANCH: 'main',
   DATA_PATH: 'data/bookings.json',
   GT_TOKEN_P1: 'github_pat_',
   GT_TOKEN_P2: '11CBYB3XY0pjoglxjtDtYO_RRLC5Lp1LWSqrlWbO1uy63y63EP9T1N9Yzkh6D8CcQgXPZQCXWMDEFWaflc', // <-- PASTE THE REST OF YOUR NEW TOKEN HERE
