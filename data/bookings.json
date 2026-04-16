@@ -253,5 +253,19 @@
     "slotId": "1200",
     "timeRange": "12:00 – 12:30",
     "bookedAt": "2026-04-16T16:07:53.677Z"
+  },
+  {
+    "id": "1776356899392",
+    "name": "Patel",
+    "email": "dmalaviy@depaul.edu",
+    "studentId": "fjn9",
+    "course": "nin",
+    "reason": "nin",
+    "day": "Thursday",
+    "dayDate": "2026-04-16",
+    "dayDisplay": "Apr 16, 2026",
+    "slotId": "1230",
+    "timeRange": "12:30 – 13:00",
+    "bookedAt": "2026-04-16T16:28:19.392Z"
   }
 ]
